@@ -1,13 +1,46 @@
-<a href="/">Home</a>
-<a href="/about/">About</a>
-<a href="/blog/">Blog</a>
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import '../styles/global.css';
 
-<body>
-    <h1>Dulkir.com</h1>
-    <h2>About Me</h2>
-  
+const pageTitle = "About me";
+
+const identity = {
+  firstName: "Ronnie",
+  country: "USA",
+  occupation: "Software Engineer",
+  hobbies: ["video games", "hiking", "being creative"],
+};
+
+const skills = ["Java", "Minecraft Modding", "Kotlin", "Gradle", "JavaScript", "HTML", "CSS", "React", "Astro"];
+
+const skillColor = "navy";
+---
+<head>
+    <style>
+        .skill {
+            color: var(--skillColor);
+            font-weight: bold;
+        }
+    </style>
+</head>
+    
+<BaseLayout pageTitle={pageTitle}>
     <p>
         This website is intended to serve two main purposes: satisfying a desire for a creative writing outlet, and also serving as a hub to check up
         on my recent projects. Hope you enjoy!
     </p>
-  </body>
+
+    <p>Here are a few facts about me:</p>
+    <ul>
+        <li>My name is {identity.firstName}.</li>
+        <li>I live in {identity.country} and I work as a {identity.occupation}.</li>
+        {identity.hobbies.length >= 2 &&
+            <li>Two of my hobbies are: {identity.hobbies[0]} and {identity.hobbies[1]}</li>
+        }
+    </ul>
+    <p>My coding skills are (in order of familiarity):</p>
+    <ul>
+        {skills.map((skill) => <li class="skill">{skill}</li>)}
+    </ul>
+</BaseLayout>
+        

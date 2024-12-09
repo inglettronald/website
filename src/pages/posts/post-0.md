@@ -1,20 +1,15 @@
 ---
-title: 'My First Blog Post'
-pubDate: 2024-12-07
-description: 'This is the first post of my new blog.'
+layout: ../../layouts/MarkdownPostLayout.astro
+title: 'Test Post 1'
 author: 'Dulkir'
-image:
-    url: 'https://docs.astro.build/assets/rose.webp'
-    alt: 'The Astro logo on a dark background with a pink glow.'
+description: 'This is the first post of my new blog.'
+pubDate: 2024-12-07
 tags: ["astro", "blogging", "learning in public"]
 ---
-# My First Blog Post
 
-Published on: 2024-12-07
+Welcome to my **new blog**! Here, I will share my learning journey as I build a new website.
 
-Welcome to my _new blog_! Here, I will share my learning journey as I build a new website.
-
-## What I've accomplished
+## What I have accomplished
 
 1. **Installing Astro**: First, I created a new Astro project and set up my website with github pages.
 
@@ -22,6 +17,6 @@ Welcome to my _new blog_! Here, I will share my learning journey as I build a ne
 
 3. **Making Blog Posts**: This is my first blog post! I now have Astro pages and Markdown posts!
 
-## What's next
+## What is next
 
 I will finish the Astro tutorial, and then figure out something more interesting to write about.

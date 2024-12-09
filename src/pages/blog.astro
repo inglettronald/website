@@ -1,13 +1,15 @@
-<body>
-    <a href="/">Home</a>
-    <a href="/about/">About</a>
-    <a href="/blog/">Blog</a>
+---
+import '../styles/global.css';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import BlogPost from '../components/BlogPost.astro';
 
-    <h1>Dulkir.com</h1>
-    <h2>My Blog</h2>
-    <p>Work in progress.</p>
+const pageTitle = "My Blog";
+const allPosts = Object.values(await import.meta.glob('./posts/*.md', { eager: true }));
+---
+<BaseLayout pageTitle={pageTitle}>
+    <p>Work in progress. Currently no (meaningful) posts!</p>
 
     <ul>
-        <li><a href="/posts/post-0/">Post 0</a></li>
-      </ul>
-  </body>
+        {allPosts.reverse().map((post: any) => <BlogPost post={post} />)}
+    </ul>
+</BaseLayout>
