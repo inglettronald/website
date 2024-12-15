@@ -2,7 +2,7 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 import '../styles/global.css';
 
-const pageTitle = "About me";
+const pageTitle = "About Me";
 
 const identity = {
   firstName: "Ronnie",
@@ -12,32 +12,41 @@ const identity = {
 };
 
 const skills = ["Java", "Minecraft Modding", "Kotlin", "Gradle", "JavaScript", "HTML", "CSS", "React", "Astro"];
-
-const skillColor = "navy";
 ---
-<head>
-    <style>
-        .skill {
-            color: var(--skillColor);
-            font-weight: bold;
-        }
-    </style>
-</head>
     
 <BaseLayout pageTitle={pageTitle}>
+
+    <h2>Brief History</h2>
     <p>
-        This website is intended to serve two main purposes: satisfying a desire for a creative writing outlet, and also serving as a hub to check up
-        on my recent projects. Hope you enjoy!
+        I'm currently working as a software engineer at Moonsworth, working on
+        <a href="https://lunarclient.com">Lunar Client</a>, the most successful/largest third party client
+        for playing Minecraft. I was hired there in August of 2023 after receiving a small amount of notoriety in the
+        <a href="https://en.wikipedia.org/wiki/Hypixel">Hypixel</a> Skyblock Modding community for some of my open
+        source projects (if you're interested in learning more about this, check out my portfolio page!).
     </p>
 
-    <p>Here are a few facts about me:</p>
-    <ul>
-        <li>My name is {identity.firstName}.</li>
-        <li>I live in {identity.country} and I work as a {identity.occupation}.</li>
-        {identity.hobbies.length >= 2 &&
-            <li>Two of my hobbies are: {identity.hobbies[0]} and {identity.hobbies[1]}</li>
-        }
-    </ul>
+    <p>
+        I was born and raised in Wisconsin USA, and had a particular affinity for music and the arts in high school and
+        pre-COVID college. Currently, it's been a while since I've done anything organized in regards to music
+        (band or choir, particularly) but it's something I'd like to get back into whenever life settles down a bit.
+        I'm also still playing and enjoying video games a lot, even outside of my work. At the time of writing,
+        I've been checking out some Hogwarts Legacy.
+    </p>
+
+    <p>
+        I'm also still playing a bit of Skyblock here and there outside of work. However, my involvement with that game
+        has intentionally been cut back pretty substantially compared to my former schedule. When I'm playing now, I'm
+        usually just doing whatever sounds fun in that moment - rather than chasing any particular long term goals.
+    </p>
+
+    <p>
+        Generally, I've found that I have far too many things that I would <b>like</b> to do for the amount of bandwidth
+        that I possess. However, if you're looking for a project partner for anything interesting in the open source
+        community, I am receptive to hearing any pitches. I find partner/small group programming particularly enjoyable
+        compared to it's solo counterpart.
+    </p>
+
+    <h2>Language/Framework Buzzwords</h2>
     <p>My coding skills are (in order of familiarity):</p>
     <ul>
         {skills.map((skill) => <li class="skill">{skill}</li>)}
