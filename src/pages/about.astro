@@ -3,30 +3,22 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import '../styles/global.css';
 
 const pageTitle = "About Me";
-
-const identity = {
-  firstName: "Ronnie",
-  country: "USA",
-  occupation: "Software Engineer",
-  hobbies: ["video games", "hiking", "being creative"],
-};
-
-const skills = ["Java", "Minecraft Modding", "Kotlin", "Gradle", "JavaScript", "HTML", "CSS", "React", "Astro"];
 ---
     
 <BaseLayout pageTitle={pageTitle}>
 
-    <h2>Brief History</h2>
+    <h2>Current Employment</h2>
     <p>
-        I'm currently working as a software engineer at Moonsworth, working on
+        My name is Ronald, and I'm currently working as a software engineer at Moonsworth, working on
         <a href="https://lunarclient.com">Lunar Client</a>, the most successful/largest third party client
         for playing Minecraft. I was hired there in August of 2023 after receiving a small amount of notoriety in the
         <a href="https://en.wikipedia.org/wiki/Hypixel">Hypixel</a> Skyblock Modding community for some of my open
         source projects (if you're interested in learning more about this, check out my portfolio page!).
     </p>
 
+    <h2>Upbringing and Hobbies</h2>
     <p>
-        I was born and raised in Wisconsin USA, and had a particular affinity for music and the arts in high school and
+        I was born and raised in Wisconsin USA, and had an affinity for music and the arts in high school and
         pre-COVID college. Currently, it's been a while since I've done anything organized in regards to music
         (band or choir, particularly) but it's something I'd like to get back into whenever life settles down a bit.
         I'm also still playing and enjoying video games a lot, even outside of my work. At the time of writing,
@@ -39,17 +31,13 @@ const skills = ["Java", "Minecraft Modding", "Kotlin", "Gradle", "JavaScript", "
         usually just doing whatever sounds fun in that moment - rather than chasing any particular long term goals.
     </p>
 
+
+    <h2>A Note on Open Source</h2>
     <p>
         Generally, I've found that I have far too many things that I would <b>like</b> to do for the amount of bandwidth
         that I possess. However, if you're looking for a project partner for anything interesting in the open source
         community, I am receptive to hearing any pitches. I find partner/small group programming particularly enjoyable
         compared to it's solo counterpart.
     </p>
-
-    <h2>Language/Framework Buzzwords</h2>
-    <p>My coding skills are (in order of familiarity):</p>
-    <ul>
-        {skills.map((skill) => <li class="skill">{skill}</li>)}
-    </ul>
 </BaseLayout>
         
