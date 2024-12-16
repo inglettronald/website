@@ -5,11 +5,41 @@ import BlogPost from '../components/BlogPost.astro';
 
 const pageTitle = "My Blog";
 const allPosts = Object.values(await import.meta.glob('./posts/*.md', { eager: true }));
+
+// TODO: there's probably some native date comparison that I can take
+// advantage of here, but I do not know of it! For now, this mess is fine
+function comparePosts(a, b): number {
+    let aDate = a.frontmatter.pubDate;
+    let bDate = b.frontmatter.pubDate;
+
+    if (a.frontmatter.lastModified != null) {
+        aDate = a.frontmatter.lastModified;
+    }
+    if (b.frontmatter.lastModified != null) {
+        bDate = b.frontmatter.lastModified;
+    }
+    const aStr = aDate.toString().slice(0, 10);
+    const bStr = bDate.toString().slice(0, 10);
+    const aYr = Number.parseInt(aStr.slice(0, 4));
+    const bYr = Number.parseInt(bStr.slice(0, 4));
+    const aMonth = Number.parseInt(aStr.slice(5, 7));
+    const bMonth = Number.parseInt(bStr.slice(5, 7));
+    const aDay = Number.parseInt(aStr.slice(8, 10));
+    const bDay = Number.parseInt(bStr.slice(8, 10));
+    if (aYr > bYr) return -1;
+    if (bYr > aYr) return 1;
+    if (aMonth > bMonth) return -1;
+    if (bMonth > aMonth) return 1;
+    if (aDay > bDay) return -1;
+    if (bDay > aDay) return 1;
+    return 0;
+}
+
 ---
 <BaseLayout pageTitle={pageTitle}>
     <p>Work in progress. Currently no (meaningful) posts!</p>
 
     <ul>
-        {allPosts.reverse().map((post: any) => <BlogPost post={post} />)}
+        {allPosts.sort((a, b) => comparePosts(a, b)).map((post: any) => <BlogPost post={post} />)}
     </ul>
 </BaseLayout>

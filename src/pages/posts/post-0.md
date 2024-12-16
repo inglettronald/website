@@ -4,6 +4,7 @@ title: 'Test Post 1'
 author: 'Dulkir'
 description: 'This is the first post of my new blog.'
 pubDate: 2024-12-07
+lastModified: 2024-12-16
 tags: ["astro", "blogging", "learning in public"]
 ---
 
@@ -20,3 +21,8 @@ Welcome to my **new blog**! Here, I will share my learning journey as I build a 
 ## What is next
 
 I will finish the Astro tutorial, and then figure out something more interesting to write about.
+
+## Edit (12-16-2024)
+
+I've since finished the tutorial, and have messed around and added more sorting and other cosmetic improvements to the
+blogging layout.

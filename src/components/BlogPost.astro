@@ -5,8 +5,12 @@ const url = post.url;
 const frontmatter = post.frontmatter;
 const title = frontmatter.title;
 const pubDate = frontmatter.pubDate.toString().slice(0,10);
+const edited = frontmatter.lastModified != null
+        ? frontmatter.lastModified.toString().slice(0, 10)
+        : null;
 ---
 
 <li>
-        <a href={url}>{title}</a> - <i>({pubDate})</i>
+        <a href={url}>{title}</a> -
+        <i> (Published {pubDate}{edited != null && <span>, Updated {edited}</span>})</i>
 </li>
