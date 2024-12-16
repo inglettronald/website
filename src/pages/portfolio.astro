@@ -1,11 +1,138 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
+import Skill from "../components/Skill.astro";
 
 const pageTitle = "Portfolio";
+const green = 0x00FF00;
+const yellow = 0xCCCC00;
+const red = 0xFF0000;
 ---
 
 <BaseLayout pageTitle={pageTitle}>
     <p>
         Under Construction!
     </p>
+
+    <hr>
+    <h1>Skills</h1>
+    <h2>Key</h2>
+    <ul>
+        <li><Skill name="Green" color={green} /> : High proficiency / Used professionally or on large projects</li>
+        <li><Skill name="Yellow" color={yellow} /> : Medium proficiency / Open Source or smaller scale </li>
+        <li><Skill name="Red" color={red} /> : Lower proficiency, but worth mention (i.e: school courses only)</li>
+    </ul>
+
+    <h2>Languages</h2>
+    <Skill name="Java" color={green} />
+    <Skill name="Kotlin" color={green} />
+    <Skill name="Javascript" color={yellow} />
+    <Skill name="CSS" color={yellow} />
+    <Skill name="HTML" color={yellow} />
+    <Skill name="C" color={red} />
+    <Skill name="Python" color={red} />
+
+    <h2>Frameworks and Libraries</h2>
+    <Skill name="Mixin" color={green} />
+    <Skill name="LWJGL" color={green} />
+    <Skill name="GLFW" color={green} />
+    <Skill name="Gradle" color={yellow} />
+    <Skill name="Astro" color={yellow} />
+    <Skill name="React" color={red} />
+    <Skill name="React Native" color={red} />
+    <Skill name="SQL" color={red} />
+
+    <h2>Other</h2>
+    <Skill name="Game Systems / Development" color={green} />
+    <Skill name="Project Planning / Design" color={green} />
+    <Skill name="Tech Support" color={yellow} />
+
+    <hr>
+
+    <h1>Employment and Education</h1>
+
+    <h2>- Moonsworth / Lunar Client</h2>
+    <i>(August 2023 - present)</i>
+    <ul>
+        <li>Wrote client side functionality for user Quality of Life across 20 versions of Minecraft</li>
+        <li>Participated in debugging/fixing complicated issues</li>
+        <li>Obtained hands-on experience with maintaining much larger/longer living code bases</li>
+    </ul>
+
+    <h2>- University of Wisconsin, Madison</h2>
+    <i>(September 2020 - December 2023)</i>
+    <ul>
+        <li>Graduated with a Bachelor's Degree in Computer Science</li>
+        <li>Gained appreciation for a breadth of modern technologies and their underlying systems</li>
+        <li>Learning how to learn!</li>
+    </ul>
+
+    <h2>- University of Wisconsin, La Crosse</h2>
+    <i>(September 2019 - May 2020)</i>
+    <ul>
+        <li>First Year of College Education</li>
+    </ul>
+
+    <hr>
+
+    <h1>Personal Endeavors</h1>
+
+    <p>
+        I gravitated towards open source instead of internships for getting experience outside of college, as I
+        found it personally fulfilling. Here, I will give a summary of past and current projects.
+    </p>
+
+    <h2>Dulkir Mod</h2>
+    <h3><a href="https://github.com/inglettronald/DulkirMod">1.8.9</a></h3>
+    <p>
+        This project was my choice for my first big open source project, and aimed at bringing a collection of niche
+        client-side Quality of Life features to minecraft, particularly minded towards player of the popular MMO "Hypixel
+        Skyblock". This project was my early teacher for technologies such as Gradle, Mixin, and an introduction to
+        internal game loop systems. As a former active player of the game, my unique insight towards the wants and needs
+        of the player base were instrumental to the success of the project, and the collection of features chosen garnered
+        the project > 200,000 downloads on GitHub. The project is now considered EOL (End of Life), as it is a conflict
+        of interest with my current job.
+    </p>
+
+    <h3><a href="https://github.com/inglettronald/DulkirMod-Fabric">1.21.4 (or modern)</a></h3>
+    <p>
+        When Hypixel indicated they were
+        <a href="https://hypixel.net/threads/1-0-design-thread-9-foraging-island-and-minecraft-version.5185676/">
+            interested in porting much of their backend to support exclusively modern versions of the game
+        </a>
+        (mostly to take advantage of new blocks/entities etc), me and my friend Nea expressed a mutual interest to
+        get ahead of the game and do early rewrites of the extensive modding scene for the much newer versions of
+        Minecraft. This was not a small task. While the game plays pretty similar across it's many versions, Minecraft
+        has gone through massive changes under the hood over the years - including an entirely different game engine
+        and many design philosophy differences. Over the course of the summer of 2023, we worked in parallel on our
+        separate projects (see <a href="https://github.com/nea89o/Firmament">Firmament</a>! Nea is an extremely talented
+        developer and this project is still active today). While we both got a lot done that summer, my part in the
+        effort was cut short in August for similar reasons to the 1.8 counterpart, and is considered EOL -
+        now only receiving updates to fix critical bugs or keep it up to date with the latest releases of Minecraft.
+    </p>
+
+    <p>
+        This project allowed me a unique chance to refine my previous implementations of features with scale in mind,
+        and was instrumental to committing the lessons of the previous project to memory. While it definitely wasn't
+        the perfect implementation for a lot of features, it was a step up in code quality, in my opinion, to it's
+        predecessor.
+    </p>
+
+    <h2>Guard (WIP)</h2>
+    <i><a href="https://github.com/inglettronald/guard">source</a></i>
+    <p>
+        There's not a ton to say about this project yet, as it's pretty early stages. However, this is intended to be
+        a Java 21 compiler plugin to essentially bring Kotlin's optional chaining inside of Java. While developing
+        previous open source projects in Kotlin primarily, there are some advantages towards staying inside Java for
+        your projects. It is still far more popular, and libraries like Mixin don't work in Kotlin anyway, so there's
+        some interfacing that will need to be done anyway. However, the boiler plate that I find the most obnoxious
+        in Java tends to be in regards to null safety and lots of guardian clauses. This will attempt to alleviate that!
+    </p>
+
+    <h2>Finally, this website!</h2>
+    <p>
+        Not too much to say here, as a website built on such a framework is really nothing to write home about. However,
+        I believe it's important for me to regularly brush up on this sort of material, So I will be maintaining
+        this website and it's design periodically, just to maintain some familiarity with the tools of web development.
+    </p>
+
 </BaseLayout>

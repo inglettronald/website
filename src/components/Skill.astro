@@ -1,0 +1,36 @@
+---
+const { name, color } = Astro.props;
+
+const red = color >> 16;
+const green = color >> 8 & 0xFF;
+const blue = color & 0xFF;
+
+const darkRed = red / 2;
+const darkGreen = green / 2;
+const darkBlue = blue / 2;
+
+---
+
+<div class = "skill">
+    <span><b>{name}</b></span>
+</div>
+
+<style define:vars={{red, green, blue, darkRed, darkGreen, darkBlue}}>
+    .skill {
+        color: #f7dfbf;
+        background-color: rgb(var(--darkRed), var(--darkGreen), var(--darkBlue));
+        border-width: .2rem;
+        border-color: rgb(var(--red), var(--green), var(--blue));
+        border-style: solid;
+        border-radius: 1rem;
+        padding: .25rem .5rem;
+        text-align: center;
+        display: inline-block;
+        transition: transform 0.3s ease;
+        margin: 3px;
+    }
+
+    .skill:hover {
+        transform: scale(1.05);
+    }
+</style>
