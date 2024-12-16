@@ -7,16 +7,17 @@ const pageTitle = "Tag Index";
 ---
 
 <BaseLayout pageTitle={pageTitle}>
+    <p>Click any of the tags below to see any post including this tag!</p>
     <div class="tags">
         {tags.map((tag) => (
-                <p class="tag"><a href={`/tags/${tag}`}>{tag}</a></p>
+                <p class="tag"><a href={`/tags/${tag}`}><b>{tag}</b></a></p>
         ))}
     </div>
 </BaseLayout>
 
 <style>
     a {
-        color: #00539F;
+        color: #000000;
     }
 
     .tags {
@@ -26,10 +27,15 @@ const pageTitle = "Tag Index";
 
     .tag {
         margin: 0.25em;
-        border: dotted 1px #a1a1a1;
+        border: solid 2px #f7dfbf;
         border-radius: .5em;
         padding: .5em 1em;
         font-size: 1.15em;
-        background-color: #F8FCFD;
+        background-color: #9daf95;
+        transition: transform 0.3s ease;
+    }
+
+    .tag:hover {
+        transform: scale(1.05);
     }
 </style>
