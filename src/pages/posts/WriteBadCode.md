@@ -4,7 +4,7 @@ title: 'Why You Should Write Bad Code'
 author: 'Dulkir'
 description: 'A longwinded motivational piece on learning hard skills'
 pubDate: 2025-12-07
-lastModified: 2025-12-07
+# lastModified: 2025-12-07
 tags: ["learning", "mindset", "story", "thought-piece"]
 ---
 
