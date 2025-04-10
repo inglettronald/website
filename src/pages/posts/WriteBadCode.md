@@ -41,7 +41,7 @@ same lessons in architecting a project from the ground up - identifying a proble
 solution, and implementing a product.
 
 ### The part about bad coding:
-The project I chose was a minecraft mod around hypixel skyblock. If you're particularly interested
+The project I chose was a Minecraft mod around Hypixel Skyblock. If you're particularly interested
 about it, I would recommend checking out my portfolio or it's github page, but for now I'm not trying
 to beat a dead horse and re-explain it. I want to talk about a the developer side of that project,
 rather than the user facing product.
