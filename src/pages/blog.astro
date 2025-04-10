@@ -37,7 +37,11 @@ function comparePosts(a, b): number {
 
 ---
 <BaseLayout pageTitle={pageTitle}>
-    <p>Work in progress. Currently no (meaningful) posts!</p>
+    <p>
+        Feedback is appreciated! If there's anything you'd like me to write about, feel
+        free to shoot me a suggestion on discord or by email and I'll oblige you if I think
+        I can write something worth reading on the matter.
+    </p>
 
     <ul>
         {allPosts.sort((a, b) => comparePosts(a, b)).map((post: any) => <BlogPost post={post} />)}
