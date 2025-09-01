@@ -81,7 +81,7 @@ until you tell it not to. It has different mechanisms for accepting suggestions 
 It's also impossible for an AI solution to have that sort of predictability and consistency that let you use it very
 quickly. There are almost assuredly going to still exist pauses where you're expecting a completion, and you don't receive one,
 because the whole thing runs on vibes as far as the user is concerned. You're going to have to read the whole suggestion
-as well, which is generally longer, and while reading is usually faster than typing, it's of my opinion that the difference is
+as well, which is generally longer. While reading is usually faster than typing, it's of my opinion that the difference is
 less true (and sometimes not even true situationally) in code comprehension.
 
 ### Typing Speed is also just overrated
