@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MC-259487 · The vanilla code behind the jump-reset</title>
+<style>
+:root{
+  --bg:#000; --panel:#0c0c0d; --panel-2:#111113;
+  --ink:#d7d7d9; --ink-dim:#8e8e93; --ink-faint:#5c5c61;
+  --line:#222226; --line-2:#2c2c31;
+  --warn:#e3b341; --good:#3fb950; --bad:#f85149; --info:#58a6ff;
+  --mono:"SF Mono",ui-monospace,"JetBrains Mono",Menlo,Consolas,monospace;
+  --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Roboto,Helvetica,Arial,sans-serif;
+  --fs-base:15px; --lh-base:1.6; --fs-h1:30px; --fs-h2:21px; --fs-h3:15px;
+  --fs-pre:12.5px; --fs-table:13px; --fs-mono:12px; --fs-mono-sm:11px; --fs-label:10.5px;
+  --measure:80ch; --measure-narrow:76ch;
+  --doc-width:1080px; --doc-pad-x:28px; --doc-pad-top:56px; --doc-pad-bottom:120px;
+  --space-section:64px; --space-block:18px;
+  --radius:12px; --radius-md:10px; --radius-sm:8px; --radius-code:5px; --radius-pill:999px;
+  --col-min:210px; --sticky-offset:58px;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:var(--fs-base);line-height:var(--lh-base);-webkit-font-smoothing:antialiased}
+.wrap{max-width:var(--doc-width);margin:0 auto;padding:var(--doc-pad-top) var(--doc-pad-x) var(--doc-pad-bottom)}
+header.head{border-bottom:1px solid var(--line);padding-bottom:28px;margin-bottom:8px}
+header.head:has(+ nav.toc){border-bottom:none;padding-bottom:0;margin-bottom:0}
+.kicker{font-family:var(--mono);font-size:var(--fs-mono-sm);letter-spacing:.18em;text-transform:uppercase;color:var(--ink-faint)}
+h1{font-size:var(--fs-h1);line-height:1.2;margin:14px 0 10px;font-weight:650;letter-spacing:-.01em}
+.sub{color:var(--ink-dim);max-width:var(--measure-narrow);font-size:var(--fs-base)}
+h2{font-size:var(--fs-h2);margin:var(--space-section) 0 4px;font-weight:640;letter-spacing:-.01em;scroll-margin-top:var(--sticky-offset);position:relative}
+h2 .n{font-family:var(--mono);font-size:13px;color:var(--ink-faint);margin-right:12px;font-weight:400}
+h3{font-size:var(--fs-h3);margin:30px 0 8px;font-weight:640;color:var(--ink);scroll-margin-top:var(--sticky-offset);position:relative}
+.anchor{position:absolute;left:-1.05em;opacity:0;color:var(--ink-faint);text-decoration:none;font-weight:400;transition:opacity .12s}
+h2:hover>.anchor,h3:hover>.anchor,h2:focus-within>.anchor,h3:focus-within>.anchor{opacity:1}
+.anchor:hover{color:var(--info);text-decoration:none}
+.lede{color:var(--ink-dim);margin:6px 0 22px;max-width:var(--measure-narrow)}
+p{max-width:var(--measure)}
+code{font-family:var(--mono);font-size:.86em;background:var(--panel-2);border:1px solid var(--line);border-radius:var(--radius-code);padding:1px 5px;color:#c9c9cf}
+a{color:var(--info);text-decoration:none}
+a:hover{text-decoration:underline}
+.muted{color:var(--ink-dim)}
+.faint{color:var(--ink-faint)}
+em{font-style:italic;color:var(--ink)}
+nav.toc{position:sticky;top:0;z-index:20;display:flex;flex-wrap:nowrap;align-items:stretch;margin:20px calc(var(--doc-pad-x) * -1) 0;padding:0 var(--doc-pad-x);font-family:var(--mono);font-size:var(--fs-mono);background:var(--bg);border-bottom:1px solid var(--line);overflow-x:auto;overscroll-behavior-x:contain;scrollbar-width:thin;scrollbar-color:var(--line-2) transparent}
+nav.toc::-webkit-scrollbar{height:6px}
+nav.toc::-webkit-scrollbar-thumb{background:var(--line-2);border-radius:var(--radius-pill)}
+nav.toc::-webkit-scrollbar-track{background:transparent}
+nav.toc a{flex:0 0 auto;white-space:nowrap;display:flex;align-items:center;color:var(--ink-dim);padding:9px 14px}
+nav.toc a+a{border-left:1px solid var(--line)}
+nav.toc a:hover{color:var(--ink);background:var(--panel-2);text-decoration:none}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:22px 24px;margin:var(--space-block) 0}
+.panel.tight{padding:16px 18px}
+.note{border-left:2px solid var(--line-2);padding:12px 16px;margin:16px 0;background:var(--panel);border-radius:0 var(--radius-sm) var(--radius-sm) 0}
+.note .tag{font-family:var(--mono);font-size:var(--fs-label);letter-spacing:.14em;text-transform:uppercase;display:block;margin-bottom:4px}
+.note.warn{border-left-color:var(--warn)} .note.warn .tag{color:var(--warn)}
+.note.bad{border-left-color:var(--bad)}   .note.bad .tag{color:var(--bad)}
+.note.good{border-left-color:var(--good)} .note.good .tag{color:var(--good)}
+.note.info{border-left-color:var(--info)} .note.info .tag{color:var(--info)}
+.note p{margin:4px 0 0}
+.dot{display:inline-block;width:8px;height:8px;border-radius:2px;margin-right:7px;vertical-align:middle}
+.dot.warn{background:var(--warn)} .dot.bad{background:var(--bad)} .dot.good{background:var(--good)} .dot.info{background:var(--info)}
+.legend{display:flex;gap:22px;flex-wrap:wrap;font-family:var(--mono);font-size:var(--fs-mono);color:var(--ink-dim);margin:10px 0 0}
+pre{background:var(--panel-2);border:1px solid var(--line);border-radius:var(--radius-md);padding:16px 18px;overflow:auto;font-family:var(--mono);font-size:var(--fs-pre);line-height:1.62;color:#c4c4ca;margin:14px 0}
+pre .c{color:var(--ink-faint)}
+pre .add{color:var(--good)}
+pre .del{color:var(--bad)}
+pre .em{color:var(--info)}
+table{width:100%;border-collapse:collapse;margin:16px 0;font-size:var(--fs-table)}
+th,td{text-align:left;padding:10px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-family:var(--mono);font-size:var(--fs-label);letter-spacing:.1em;text-transform:uppercase;color:var(--ink-dim);font-weight:500}
+td code{font-size:.85em}
+tr:last-child td{border-bottom:none}
+.sev{font-family:var(--mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;white-space:nowrap}
+.sev.warn{color:var(--warn)} .sev.bad{color:var(--bad)} .sev.info{color:var(--info)} .sev.good{color:var(--good)}
+ol.flow{list-style:none;counter-reset:s;padding:0;margin:var(--space-block) 0}
+ol.flow>li{counter-increment:s;position:relative;padding:0 0 18px 46px;margin:0}
+ol.flow>li:before{content:counter(s);position:absolute;left:0;top:-2px;width:28px;height:28px;border:1px solid var(--line-2);border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:13px;color:var(--ink-dim)}
+ol.flow>li:not(:last-child):after{content:"";position:absolute;left:14px;top:30px;bottom:2px;width:1px;background:var(--line)}
+ol.flow>li b{color:var(--ink)}
+.pillrow{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0 0}
+.pill{font-family:var(--mono);font-size:var(--fs-mono);color:var(--ink-dim);border:1px solid var(--line);border-radius:var(--radius-code);padding:3px 9px}
+hr{border:none;border-top:1px solid var(--line);margin:0}
+.colophon{font-size:var(--fs-mono);margin-top:20px;font-family:var(--mono);color:var(--ink-faint)}
+@media(max-width:760px){.anchor{display:none}}
+@media print{
+  :root{--bg:#fff;--panel:#fff;--panel-2:#f6f6f7;--ink:#16161a;--ink-dim:#43434a;--ink-faint:#6b6b73;--line:#d8d8de;--line-2:#c4c4cc;--warn:#9a6b00;--good:#1a7f37;--bad:#b4262b;--info:#0b5cad}
+  body{background:#fff;color:var(--ink);font-size:11pt;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .wrap{max-width:none;padding:0}
+  nav.toc{display:none}.anchor{display:none}
+  a{color:var(--info)}
+  .panel,.note,pre,table{break-inside:avoid;page-break-inside:avoid}
+  h1,h2,h3{break-after:avoid;page-break-after:avoid}
+  pre{white-space:pre-wrap;word-break:break-word}
+}
+
+/* ---- tick-pipeline (bespoke): an ordered spine of stages — used for the
+   single-tick order and the multiplayer round trip. --------------------- */
+.tickpipe{margin:var(--space-block) 0;border:1px solid var(--line);border-radius:var(--radius);background:var(--panel);overflow:hidden}
+.tickpipe .cap{font-family:var(--mono);font-size:var(--fs-mono-sm);letter-spacing:.1em;text-transform:uppercase;color:var(--ink-dim);padding:12px 16px;border-bottom:1px solid var(--line)}
+.tickpipe ol{list-style:none;margin:0;padding:8px 0}
+.tickpipe li{position:relative;display:flex;align-items:flex-start;gap:14px;padding:11px 18px 11px 50px}
+.tickpipe li:before{content:"";position:absolute;left:25px;top:0;bottom:0;width:1px;background:var(--line)}
+.tickpipe li:first-child:before{top:20px}
+.tickpipe li:last-child:before{bottom:20px}
+.tickpipe .node{position:absolute;left:18px;top:15px;width:15px;height:15px;border-radius:50%;background:var(--panel-2);border:1px solid var(--line-2);z-index:1}
+.tickpipe .body{flex:1;min-width:0}
+.tickpipe .what{font-size:var(--fs-pre)}
+.tickpipe .what b{color:var(--ink);font-weight:600}
+.tickpipe .meta{font-family:var(--mono);font-size:var(--fs-label);color:var(--ink-faint);margin-top:3px}
+.tickpipe .flag{flex:0 0 auto;font-family:var(--mono);font-size:var(--fs-label);letter-spacing:.06em;text-transform:uppercase;padding:3px 9px;border-radius:var(--radius-code);align-self:center;white-space:nowrap;border:1px solid var(--line-2);color:var(--ink-dim)}
+.tickpipe li.root .node{background:var(--bad);border-color:var(--bad)}
+.tickpipe li.root .flag{border-color:var(--bad);color:var(--bad)}
+.tickpipe li.inject .node{background:var(--info);border-color:var(--info)}
+.tickpipe li.inject .flag{border-color:var(--info);color:var(--info)}
+.tickpipe li.transit .node{background:transparent;border-style:dashed;border-color:var(--warn)}
+.tickpipe li.transit .flag{border-color:var(--warn);color:var(--warn)}
+@media(max-width:760px){.tickpipe li{flex-wrap:wrap}}
+@media print{.tickpipe{break-inside:avoid}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header class="head">
+  <div class="kicker">Mojira MC-259487 · vanilla Minecraft source · LivingEntity.knockback / Entity.lerpMotion</div>
+  <h1>The vanilla code behind the jump-reset</h1>
+  <p class="sub">Why jumping on the tick you are hit cancels your knockback. The cancellation is a blend formula in the movement code; the strict "late is fine, early fails" timing is an artifact of how the result travels back to you over the network as an overwrite.</p>
+</header>
+<nav class="toc">
+  <a href="#idea">1 · One idea</a>
+  <a href="#report">2 · The report</a>
+  <a href="#blend">3 · Knockback blends</a>
+  <a href="#inject">4 · Jump injects</a>
+  <a href="#tick">5 · The local tick</a>
+  <a href="#wire">6 · Across the wire</a>
+  <a href="#timing">7 · Late vs early</a>
+  <a href="#math">8 · Arithmetic</a>
+  <a href="#versions">9 · 1.8 vs 1.17+</a>
+  <a href="#fix">10 · Why still open</a>
+</nav>
+
+<h2 id="idea"><a class="anchor" href="#idea" aria-label="Permalink">#</a><span class="n">01</span>The one idea</h2>
+<p class="lede">Two layers, two questions. The movement code explains <em>why</em> a sprint-jump cancels knockback. The netcode explains <em>when</em> you have to do it.</p>
+<p>When you are hit, <code>LivingEntity.knockback</code> sets your new horizontal velocity to <strong><code>oldVelocity / 2 − knockback</code></strong>. It blends, it does not replace. So velocity you already carry toward the attacker is halved and then subtracted from the knockback that pushes you away. A sprint-jump injects a burst of velocity in your look direction — straight at the enemy — so when the blend folds it in, most of the horizontal knockback cancels and you keep your ground. That is the mechanism, and it is entirely in vanilla movement code.</p>
+<p>But in multiplayer the hit is resolved on the <em>server</em>, and the result is shipped back to you as a velocity packet that <strong>overwrites</strong> your local motion. That single fact — overwrite, not blend, applied after a network delay — is why you can jump <em>on time or late</em> but <strong>never early</strong>: anything you do before the packet lands is discarded by the overwrite, and anything after it survives. The timing window you feel is the shape of that round trip.</p>
+
+<div class="note info">
+  <span class="tag">Source basis</span>
+  <p>All code is decompiled Minecraft from the multi-version tree on disk: modern snippets are Mojang-mapped (the <code>knockback$v1_17_0</code> variant spans 1.17 through 26.x, covering the affected 1.19.3 / 1.20.6); 1.8.9 snippets are MCP-named. Decompiler artifacts are lightly cleaned, logic untouched. Where a claim rests on architecture rather than a line I could open, it is flagged.</p>
+</div>
+
+<h2 id="report"><a class="anchor" href="#report" aria-label="Permalink">#</a><span class="n">02</span>What the report says</h2>
+<p class="lede">The bug as Mojang records it.</p>
+<div class="panel tight">
+<table>
+  <tr><th style="width:22%">Field</th><th>Value</th></tr>
+  <tr><td>Key / Summary</td><td><code>MC-259487</code> — Jumping just as you're attacked allows you to take little to no horizontal knockback</td></tr>
+  <tr><td>Status</td><td>Open <span class="sev warn">● unresolved</span> · Confirmation: Community Consensus</td></tr>
+  <tr><td>Affects</td><td><span class="pillrow" style="margin:0"><span class="pill">1.19.3</span><span class="pill">23w04a</span><span class="pill">1.20.6</span><span class="pill">24w44a</span></span></td></tr>
+  <tr><td>Duplicated by</td><td><code>MC-278103</code> Jumping can reset player's velocity · <code>MC-272128</code> Vertical/reduced knockback when hit while jumping</td></tr>
+</table>
+</div>
+<p>Verbatim: <em>"While sprinting forward, when you press your jump key at the same time when you get attacked, you will take reduced/no horizontal knockback depending on how accurately you time it."</em> Both halves are load-bearing in the code below: it requires <strong>sprinting forward</strong> (the forward velocity does the cancelling) and it is <strong>timing- and ping-dependent</strong> (the jump must align with how the hit is registered and sent back).</p>
+
+<h2 id="blend"><a class="anchor" href="#blend" aria-label="Permalink">#</a><span class="n">03</span>Root cause: knockback blends, it never overwrites</h2>
+<p class="lede">The single line the whole exploit rests on, in <code>LivingEntity.knockback</code>.</p>
+
+<pre><span class="c">// net/minecraft/world/entity/LivingEntity.java  —  knockback$v1_17_0 (1.17 → 26.x)</span>
+public void knockback(double strength, double x, double z) {
+   strength *= 1.0 - this.getAttributeValue(Attributes.KNOCKBACK_RESISTANCE);
+   if (!(strength &lt;= 0.0)) {
+      this.needsSync = true;                             <span class="c">// mark velocity dirty → server will sync it</span>
+      Vec3 dm = this.getDeltaMovement();                 <span class="c">// your CURRENT velocity</span>
+      Vec3 kb = new Vec3(x, 0.0, z).normalize().scale(strength);
+      this.setDeltaMovement(
+          <span class="del">dm.x / 2.0 - kb.x,</span>                              <span class="c">// horizontal: HALVE old, then subtract knockback</span>
+          this.onGround() ? Math.min(0.4, dm.y / 2.0 + strength) : dm.y,
+          <span class="del">dm.z / 2.0 - kb.z);</span>                             <span class="c">// same on Z</span>
+   }
+}</pre>
+
+<p>The horizontal result is not <code>−kb</code>; it is <code>dm/2 − kb</code>. Your pre-hit velocity is a first-class input to the knockback you receive. If <code>dm.x</code> points toward the attacker (the negative of the knockback direction), it cancels into <code>kb.x</code> and the magnitude collapses. The faster you are already moving into the hit, the less knockback you take. Note the <code>needsSync = true</code>: this same call flags your velocity dirty, which is what later sends it across the wire in §6.</p>
+
+<h2 id="inject"><a class="anchor" href="#inject" aria-label="Permalink">#</a><span class="n">04</span>The lever: a sprint-jump injects velocity toward the attacker</h2>
+<p class="lede">Jumping is not only vertical. While sprinting it adds a horizontal burst in your look direction — and in a duel you are looking straight at the enemy.</p>
+
+<pre><span class="c">// LivingEntity.java  —  jumpFromGround()</span>
+public void jumpFromGround() {
+   float jumpPower = this.getJumpPower();                 <span class="c">// 0.42 at baseline</span>
+   if (!(jumpPower &lt;= 1.0E-5F)) {
+      Vec3 v = this.getDeltaMovement();
+      this.setDeltaMovement(v.x, Math.max(jumpPower, v.y), v.z);
+      if (this.isSprinting()) {
+         float yaw = this.getYRot() * 0.017453292F;       <span class="c">// degrees → radians</span>
+         <span class="em">this.addDeltaMovement(new Vec3(-Mth.sin(yaw) * 0.2, 0.0, Mth.cos(yaw) * 0.2));</span>
+      }                                                    <span class="c">// +0.2 in the facing direction</span>
+   }
+}</pre>
+
+<p>The sprint clause adds <code>0.2</code> of horizontal speed pointed where you face. Stack it on normal sprint momentum (~<code>0.28</code>/tick) and, on the jump tick, <code>dm</code> toward the attacker peaks near <code>0.48</code>. Feed that into <code>dm/2 − kb</code> and the subtraction nearly zeroes out. The jump also sets <code>v.y</code> to the jump power, so the vertical survives — hence "you popped up but barely moved back."</p>
+
+<div class="note info">
+  <span class="tag">Why "while sprinting forward" is mandatory</span>
+  <p>Stand still and jump, and <code>dm.x ≈ 0</code>, so <code>dm.x/2 − kb.x ≈ −kb.x</code> — full knockback. The cancellation comes entirely from your forward velocity; the jump's job is to spike that velocity at the decisive moment. No forward sprint, no reset.</p>
+</div>
+
+<h2 id="tick"><a class="anchor" href="#tick" aria-label="Permalink">#</a><span class="n">05</span>The local tick: a tight window with no network</h2>
+<p class="lede">In singleplayer there is no packet. The hit and your jump are resolved in the same tick, and the in-tick order is the whole story — which is why the window here is only a tick or two.</p>
+
+<div class="tickpipe">
+  <div class="cap">Within one tick — LivingEntity.aiStep() order</div>
+  <ol>
+    <li class="inject"><span class="node"></span>
+      <div class="body">
+        <div class="what"><b>Jump phase.</b> If <code>this.jumping &amp;&amp; onGround &amp;&amp; noJumpDelay == 0</code>, call <code>jumpFromGround()</code> — injecting the forward burst into <code>deltaMovement</code>.</div>
+        <div class="meta">aiStep() · profiler.push("jump") · line ~2600</div>
+      </div>
+      <span class="flag">injects velocity</span>
+    </li>
+    <li class="root"><span class="node"></span>
+      <div class="body">
+        <div class="what"><b>Knockback blend.</b> The attacker's hit runs <code>knockback()</code> — <code>dm/2 − kb</code> — folding your freshly-spiked forward velocity into the result.</div>
+        <div class="meta">LivingEntity.knockback() · the dm/2 − kb line</div>
+      </div>
+      <span class="flag">root cause</span>
+    </li>
+    <li><span class="node"></span>
+      <div class="body">
+        <div class="what"><b>Travel &amp; friction.</b> <code>travel()</code> applies movement and friction (airborne ≈ 0.91/tick, ground ≈ 0.55). With horizontal already small, what remains decays.</div>
+        <div class="meta">aiStep() · profiler.push("travel") · line ~2634</div>
+      </div>
+      <span class="flag">decays result</span>
+    </li>
+  </ol>
+</div>
+
+<p>For the blend to cancel, your forward velocity has to be present in <code>dm</code> at the instant <code>knockback()</code> runs. With everything local and same-tick, that alignment is narrow — the one-or-two-tick window players describe offline. Multiplayer is where it widens, and where the asymmetry appears.</p>
+
+<h2 id="wire"><a class="anchor" href="#wire" aria-label="Permalink">#</a><span class="n">06</span>Across the wire: the hit comes back as an overwrite</h2>
+<p class="lede">In PvP the hit is resolved on the server and pushed to you as a velocity packet. How that packet is applied is the hinge of the entire timing model.</p>
+
+<p>Your movement is client-authoritative: every tick your client simulates your player (§5) and reports the resulting position to the server, which trusts it within anti-cheat limits. Knockback is the exception — it originates server-side. The server runs <code>knockback()</code> on its copy of you, the <code>needsSync</code> flag from §3 marks your motion dirty, and the entity tracker sends you a <code>ClientboundSetEntityMotionPacket</code>. When it arrives, your client applies it:</p>
+
+<pre><span class="c">// net/minecraft/world/entity/Entity.java  —  lerpMotion(), invoked by the SetEntityMotion packet</span>
+public void lerpMotion(double x, double y, double z) {
+   <span class="del">this.setDeltaMovement(x, y, z);</span>   <span class="c">// a hard SET — your current velocity is DISCARDED, not blended</span>
+}</pre>
+
+<p>That is the crux. The server's blend already happened with the server's view of your velocity; what reaches your client is an absolute value that <strong>replaces</strong> your local motion wholesale. So there are two distinct moments — the server resolving the hit, and your client overwriting — separated by your latency:</p>
+
+<div class="tickpipe">
+  <div class="cap">Multiplayer round trip — one hit</div>
+  <ol>
+    <li class="root"><span class="node"></span>
+      <div class="body">
+        <div class="what"><b>Server resolves the hit.</b> <code>knockback()</code> blends <code>dm/2 − kb</code> on the server's copy of you and flags your motion dirty.</div>
+        <div class="meta">server tick T · LivingEntity.knockback() + needsSync</div>
+      </div>
+      <span class="flag">server-side blend</span>
+    </li>
+    <li class="transit"><span class="node"></span>
+      <div class="body">
+        <div class="what"><b>Velocity packet in flight.</b> The dirty flag makes the server send <code>SetEntityMotion</code> back to you. It does not arrive instantly.</div>
+        <div class="meta">in flight ≈ RTT/2 (your ping)</div>
+      </div>
+      <span class="flag">latency</span>
+    </li>
+    <li class="inject"><span class="node"></span>
+      <div class="body">
+        <div class="what"><b>Your client overwrites.</b> <code>lerpMotion → setDeltaMovement</code> replaces your local velocity with the server's knockback. Everything you did before this instant is gone.</div>
+        <div class="meta">LocalPlayer · the decisive moment</div>
+      </div>
+      <span class="flag">overwrite</span>
+    </li>
+  </ol>
+</div>
+
+<h2 id="timing"><a class="anchor" href="#timing" aria-label="Permalink">#</a><span class="n">07</span>Why you can be late but never early</h2>
+<p class="lede">The overwrite plus client authority produce a one-sided window: velocity created before the packet is erased, velocity created after it survives.</p>
+
+<div class="note bad">
+  <span class="tag">Jump early → full knockback</span>
+  <p>If your jump fires before the packet lands, your forward burst moves you and is reported — then <code>SetEntityMotion</code> arrives and <code>setDeltaMovement</code> overwrites it with the server's full knockback. Your work is discarded and you eat the whole hit. This is why an early jump does not just fail to help, it fails: there is nothing your pre-hit velocity can do that the overwrite will not erase.</p>
+</div>
+
+<div class="note good">
+  <span class="tag">Jump on time or late → reduced knockback</span>
+  <p>Once the overwrite has landed, your local velocity <em>is</em> the knockback, and authority is yours again. A jump now re-injects the <code>+0.2</code> forward boost, and holding W keeps <code>travel()</code> adding forward acceleration each tick, cutting the residual backward velocity before it carries you far. A jump on the exact overwrite tick is the "0-tick" perfect reset; later jumps still help while the backward velocity is large.</p>
+</div>
+
+<p>The window has a width for two compounding reasons. First, <strong>latency shifts the clock</strong>: the packet may not reach you until several ticks after the server's hit tick, so "late on the server's clock" is "on time on yours" — more ping, wider window. Second, <strong>the knockback decays slowly</strong>: airborne friction is ~0.91/tick, so the backward velocity persists for several ticks during which re-adding forward still meaningfully cuts displacement. Past roughly that span the knockback has already moved you and re-jumping stops mattering. A reported ~6-tick ceiling reads as the ping window plus those few still-cancellable ticks.</p>
+
+<div class="note info">
+  <span class="tag">The cross-check</span>
+  <p>Players cite two windows: ~1–2 ticks and ~6 ticks. That is the same mechanism in its two regimes. Singleplayer has no packet and no overwrite, so it is the pure same-tick blend of §5 (tight). Multiplayer layers the overwrite-plus-latency window on top (wider, and one-sided). The window literally <em>grows with latency</em> — which is the tell that the timing is a netcode artifact, not part of the knockback math.</p>
+</div>
+
+<div class="note warn">
+  <span class="tag">Honest limit of this account</span>
+  <p>Verified directly in source: the server-side blend (<code>dm/2 − kb</code> + <code>needsSync</code>) and the client-side overwrite (<code>lerpMotion → setDeltaMovement</code>). Reasoned from architecture, not a line opened here: the packet's exact send timing, and whether the server's <code>dm</code> term reflects your live forward velocity at hit-time (the part that makes a "0-tick" jump cancel server-side too). Strictly, "never early" is a multiplayer/overwrite rule; in a pure local blend, a hair-early jump could still help.</p>
+</div>
+
+<h2 id="math"><a class="anchor" href="#math" aria-label="Permalink">#</a><span class="n">08</span>The arithmetic</h2>
+<p class="lede">Plugging illustrative numbers into <code>dm.x/2 − kb.x</code> with a base knockback of 0.4. Positive = toward attacker, negative = pushed back.</p>
+<div class="panel tight">
+<table>
+  <tr><th style="width:42%">Forward velocity dm.x at the blend</th><th style="width:28%">Horizontal result</th><th>Effect</th></tr>
+  <tr><td>Standing still · <code>0</code></td><td><code>0/2 − 0.4 = −0.40</code></td><td>Full knockback <span class="sev bad">● flung back</span></td></tr>
+  <tr><td>Sprinting in · <code>≈ 0.28</code></td><td><code>0.28/2 − 0.4 = −0.26</code></td><td>Reduced ("w-tapping") <span class="sev warn">● partial</span></td></tr>
+  <tr><td>Sprint-jump aligned · <code>≈ 0.48</code></td><td><code>0.48/2 − 0.4 = −0.16</code></td><td>Mostly cancelled <span class="sev good">● holds ground</span></td></tr>
+</table>
+</div>
+<p class="muted faint" style="font-size:13px">Magnitudes are illustrative (base strength 0.4; sprint speed and the <code>+0.2</code> boost approximate). The trend is the point: the larger your forward velocity when the blend runs, the smaller the surviving knockback.</p>
+
+<h2 id="versions"><a class="anchor" href="#versions" aria-label="Permalink">#</a><span class="n">09</span>1.8.9 vs 1.17+: same root, one modern detail</h2>
+<p class="lede">The blend is ancient, which is why jump-resetting predates the report by a decade.</p>
+
+<pre><span class="c">// 1.8.9  net/minecraft/entity/EntityLivingBase.java  —  knockBack()</span>
+this.motionX /= 2.0; this.motionY /= 2.0; this.motionZ /= 2.0;   <span class="c">// same halving</span>
+this.motionX -= var3 / var7 * 0.4;                               <span class="c">// same subtract</span>
+<span class="del">this.motionY += 0.4;</span>                                            <span class="c">// vertical pop is UNCONDITIONAL</span>
+this.motionZ -= var5 / var7 * 0.4;
+if (this.motionY &gt; 0.4) this.motionY = 0.4;</pre>
+
+<p>1.8.9 halves-and-subtracts exactly like modern, so the horizontal reset works identically. The only difference is vertical: 1.8.9 always adds the <code>0.4</code> pop, whereas modern gates it on <code>onGround</code> (<code>this.onGround() ? Math.min(0.4, dm.y/2 + strength) : dm.y</code>). So since 1.17 a hit taken while airborne also skips the upward launch. That is a secondary sweetener; the shared, load-bearing cause across every affected version is the horizontal blend.</p>
+
+<h2 id="fix"><a class="anchor" href="#fix" aria-label="Permalink">#</a><span class="n">10</span>Where a fix would live, and why it is still open</h2>
+<p class="lede">The behavior is two vanilla methods plus the netcode that connects them.</p>
+<p>Resolving MC-259487 means changing <code>LivingEntity.knockback</code> (stop blending the victim's own velocity into horizontal knockback, or clamp it), <code>jumpFromGround</code> (don't inject horizontal velocity that can oppose a simultaneous hit), or how knockback is reconciled between server and client (the overwrite is what hands players the late window). All three are core systems Mojang owns. The ticket sits at Open / Community Consensus because the behavior is load-bearing competitive tech: any of those changes alters how every PvP hit feels, so it is a balance decision as much as a code one.</p>
+
+<h2 id="look"><a class="anchor" href="#look" aria-label="Permalink">#</a>Where to look</h2>
+<div class="panel tight">
+<table>
+  <tr><th style="width:42%">Vanilla method / field</th><th style="width:22%">Class</th><th>Role in the bug</th></tr>
+  <tr><td><code>knockback(...)</code> <span class="faint">(knockback$v1_17_0)</span></td><td>LivingEntity</td><td>The <code>dm/2 − kb</code> blend — root cause; sets <code>needsSync</code></td></tr>
+  <tr><td><code>jumpFromGround()</code></td><td>LivingEntity</td><td>Injects <code>0.42</code> up + <code>0.2</code> forward sprint burst</td></tr>
+  <tr><td><code>aiStep()</code></td><td>LivingEntity</td><td>Runs jump before travel — sets the same-tick window</td></tr>
+  <tr><td><code>lerpMotion()</code> → <code>setDeltaMovement()</code></td><td>Entity</td><td>Velocity packet OVERWRITES local motion — source of the early/late asymmetry</td></tr>
+  <tr><td><code>needsSync</code> / <code>markHurt()</code></td><td>Entity</td><td>Dirty flag that triggers the server→client velocity packet</td></tr>
+  <tr><td><code>travelInAir(...)</code></td><td>LivingEntity</td><td>Air (0.91) vs ground (~0.55) friction — how the result decays</td></tr>
+  <tr><td><code>knockBack(...)</code> / <code>jump()</code></td><td>EntityLivingBase (1.8.9)</td><td>Same blend; vertical pop unconditional</td></tr>
+</table>
+</div>
+
+<hr style="margin-top:60px">
+<p class="colophon">Sources: Mojira MC-259487 (description + comments, bugs.mojang.com API) · decompiled Minecraft — LivingEntity.java &amp; Entity.java (modern, mojmap), EntityLivingBase.java (1.8.9, MCP) · Minecraft Wiki, Knockback (mechanic). Server packet timing reasoned from architecture; velocity magnitudes illustrative.</p>
+
+</div>
+<script>
+(function(){
+  var t=document.querySelector('nav.toc'); if(!t) return;
+  t.addEventListener('wheel',function(e){
+    if(!e.deltaY) return;
+    var max=t.scrollWidth-t.clientWidth; if(max<=0) return;
+    var next=Math.max(0,Math.min(max,t.scrollLeft+e.deltaY));
+    if(next!==t.scrollLeft){ t.scrollLeft=next; e.preventDefault(); }
+  },{passive:false});
+})();
+</script>
+</body>
+</html>

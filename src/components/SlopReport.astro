@@ -1,0 +1,10 @@
+---
+const { report } = Astro.props;
+
+const modified = report.modified.toISOString().slice(0, 10);
+---
+
+<li data-search={`${report.title} ${report.slug}`.toLowerCase()}>
+    <a href={report.url}>{report.title}</a> -
+    <i> (Updated {modified})</i>
+</li>
