@@ -1,51 +1,15 @@
 ---
-import fs from 'node:fs';
-import path from 'node:path';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import SlopReport from '../../components/SlopReport.astro';
+import { getSlopReports } from '../../lib/slopReports.ts';
 
 const pageTitle = 'Slop';
-
-interface SlopReportEntry {
-    slug: string;
-    url: string;
-    title: string;
-    modified: Date;
-}
-
-function getSlopReports(): SlopReportEntry[] {
-    const slopDir = path.join(process.cwd(), 'public/slop');
-    if (!fs.existsSync(slopDir)) {
-        return [];
-    }
-
-    return fs
-        .readdirSync(slopDir)
-        .filter((name) => name.endsWith('.html'))
-        .map((name) => {
-            const filePath = path.join(slopDir, name);
-            const content = fs.readFileSync(filePath, 'utf-8');
-            const slug = name.replace(/\.html$/, '');
-            const titleMatch = content.match(/<title[^>]*>([^<]*)<\/title>/i);
-            const title = titleMatch?.[1]?.trim() || slug.replace(/-/g, ' ');
-
-            return {
-                slug,
-                url: `/slop/${name}`,
-                title,
-                modified: fs.statSync(filePath).mtime,
-            };
-        })
-        .sort((a, b) => b.modified.getTime() - a.modified.getTime());
-}
-
 const reports = getSlopReports();
 ---
 
 <BaseLayout pageTitle={pageTitle}>
     <p>
-        Throwaway HTML reports. Drop a <code>.html</code> file into <code>public/slop/</code>,
-        push, and it shows up here.
+        Throwaway HTML reports. AI is getting good at writing these and I wanted a convenient way to share them.
     </p>
 
     {reports.length > 0 && (
@@ -65,17 +29,7 @@ const reports = getSlopReports();
 
     {reports.length > 0 && (
         <script>
-            const input = document.getElementById('slop-search');
-            const items = document.querySelectorAll('#slop-list li');
-
-            input?.addEventListener('input', () => {
-                const query = input.value.trim().toLowerCase();
-
-                items.forEach((item) => {
-                    const haystack = item.getAttribute('data-search') ?? '';
-                    item.hidden = query !== '' && !haystack.includes(query);
-                });
-            });
+            import '../../scripts/slop-search.js';
         </script>
     )}
 </BaseLayout>

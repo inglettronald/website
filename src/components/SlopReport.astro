@@ -1,4 +1,10 @@
 ---
+import type { SlopReportEntry } from '../lib/slopReports.ts';
+
+interface Props {
+    report: SlopReportEntry;
+}
+
 const { report } = Astro.props;
 
 const modified = report.modified.toISOString().slice(0, 10);

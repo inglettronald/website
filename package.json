@@ -18,5 +18,8 @@
   "packageManager": "pnpm@9.15.0",
   "engines": {
     "pnpm": "9.x"
+  },
+  "devDependencies": {
+    "@types/node": "^26.0.0"
   }
 }
